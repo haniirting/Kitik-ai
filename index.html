@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Китика — ИИ-ведущая</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap">
+<style>
+:root{--bg:#14122b;--panel:#241f4a;--lilac:#b9a7ff;--peach:#ffb9a3;--mint:#8fe3cf;--text:#f5f0ff;--skin:#ffd9c2;--hair:#5b3fd0}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font-family:Nunito,system-ui,sans-serif;display:flex;justify-content:center}
+body.clean{background:transparent}
+#app{width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;padding:12px;gap:10px;position:relative;overflow:hidden}
+#goals{display:flex;gap:6px}
+.goal{flex:1;background:var(--panel);border-radius:14px;padding:8px 2px;text-align:center;font-size:12px;font-weight:800;opacity:.55;border:2px solid transparent;transition:.3s}
+.goal b{display:block;font-size:26px;line-height:1.2}
+.goal.active{opacity:1;border-color:var(--lilac);transform:translateY(-3px)}
+.goal.urgent{animation:urg .8s infinite;border-color:var(--peach)}@keyframes urg{50%{transform:translateY(-3px) scale(1.08)}}
+.goal.done{opacity:1;background:var(--mint);color:#143a33}
+.goal.boss b{font-size:30px}
+#goals.shake{animation:shake .5s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+#bar{height:12px;background:var(--panel);border-radius:8px;overflow:hidden}
+#fill{height:100%;width:100%;background:linear-gradient(90deg,var(--peach),var(--lilac));transform-origin:left}
+#info{display:flex;justify-content:space-between;font-size:13px;font-weight:800;margin-top:-4px}
+#stage{flex:1;min-height:0;position:relative;border-radius:18px;overflow:hidden;background:radial-gradient(ellipse 70% 12% at 50% 93%,#c76f8e 0,transparent 75%),radial-gradient(ellipse at 50% 30%,#6b3a55 0,#2b1a35 75%)}body.clean #stage{background:none}
+#host{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:8% 0 3%;transform-origin:50% 100%;transition:transform .5s}
+#host img{height:100%;max-width:100%;object-fit:contain;transform-origin:50% 100%;animation:breathe 3.8s ease-in-out infinite;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35))}
+@keyframes breathe{0%,100%{transform:scale(1,1) rotate(-.6deg)}50%{transform:scale(.994,1.014) rotate(.6deg)}}
+#host.talk img{animation:talkb .3s ease-in-out infinite alternate}
+@keyframes talkb{from{transform:translateY(0) rotate(-.8deg)}to{transform:translateY(-1.2%) rotate(.8deg)}}
+#host.think img{animation:thinkb 2.4s ease-in-out infinite}
+@keyframes thinkb{0%,100%{transform:rotate(-1.4deg)}50%{transform:rotate(-2.4deg) translateX(-1%)}}
+#host.happy img{animation:jumpy .55s ease-in-out infinite}
+@keyframes jumpy{50%{transform:translateY(-5%) rotate(1.5deg) scale(1.01)}}
+#host.sad{transform:rotate(2deg) translateY(1.5%)}
+#host.sad img{filter:saturate(.6) brightness(.92) drop-shadow(0 6px 14px rgba(0,0,0,.35))}
+.dots,.spark{display:none;position:absolute}
+.think .dots{display:flex;top:12%;left:62%;gap:6px}
+.dots i{width:12px;height:12px;border-radius:50%;background:#fff;animation:dot 1s infinite}
+.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+.happy .spark{display:block;font-size:34px;animation:tw .6s ease-in-out infinite alternate}
+@keyframes tw{from{transform:scale(.6) rotate(0);opacity:.5}to{transform:scale(1.2) rotate(25deg);opacity:1}}
+@media (prefers-reduced-motion:reduce){#host img{animation:none!important}}
+#bubble{z-index:2;position:absolute;top:0;left:4%;right:4%;background:var(--text);color:#2b1f4a;border-radius:18px;padding:10px 14px;font-weight:800;font-size:17px;line-height:1.3;min-height:46px;opacity:0;transition:opacity .25s}
+#bubble.on{opacity:1}
+#fx{z-index:2;position:absolute;left:50%;top:40%;font-size:110px;transform:translate(-50%,-50%);pointer-events:none;opacity:0}
+#ticker{font-size:13px;min-height:36px;background:var(--panel);border-radius:12px;padding:8px 12px}
+#ticker i{color:var(--peach);font-style:normal;font-weight:800}
+#ym iframe{border:0;width:100%;height:130px;border-radius:12px}
+#np{display:none;position:absolute;left:8px;right:8px;bottom:8px;z-index:2;font-size:11px;color:#fff;background:rgba(20,18,43,.65);padding:4px 8px;border-radius:8px}
+details{background:var(--panel);border-radius:12px;padding:8px 12px;font-size:13px}
+details button{font:inherit;font-weight:800;background:var(--lilac);color:#2b1f4a;border:0;border-radius:10px;padding:8px 10px;margin:4px 4px 0 0;cursor:pointer}
+details button:focus-visible{outline:3px solid var(--mint)}
+body.clean details{display:none}
+/* host animations */
+#body{animation:bob 3s ease-in-out infinite;transform-origin:100px 250px}
+@keyframes bob{50%{transform:translateY(-5px)}}
+#head{transform-origin:100px 150px;transition:transform .4s}
+.think #head{transform:rotate(-7deg)}
+.eye{transform-origin:center;transform-box:fill-box;animation:blink 4.5s infinite}
+@keyframes blink{94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.happyEyes,.dots,.tear{display:none}
+.happy .eye{display:none}.happy .happyEyes{display:block}
+.think .dots{display:block}
+.dots circle{animation:dot 1s infinite}.dots circle:nth-child(2){animation-delay:.2s}.dots circle:nth-child(3){animation-delay:.4s}
+@keyframes dot{50%{transform:translateY(-6px)}}
+.talk #mouth{animation:talk .22s infinite alternate}
+#mouth{transform-origin:100px 136px;transform-box:fill-box}
+@keyframes talk{to{transform:scaleY(3)}}
+.happy #body{animation:jump .5s infinite}
+@keyframes jump{50%{transform:translateY(-22px)}}
+.sad #head{transform:rotate(6deg) translateY(4px)}.sad .tear{display:block}
+/* gift animations */
+.fx0{animation:f0 2.2s}.fx1{animation:f1 2.2s}.fx2{animation:f2 2.2s}.fx3{animation:f3 2.6s}.fx4{animation:f4 3s}
+@keyframes f0{0%{opacity:1;top:-10%;transform:translate(-50%,-50%) rotate(0)}70%{opacity:1;top:42%;transform:translate(-50%,-50%) rotate(540deg)}100%{opacity:0;top:42%;transform:translate(-50%,-50%) scale(1.4) rotate(540deg)}}
+@keyframes f1{0%{opacity:1;left:-10%;transform:translate(-50%,-50%) rotate(0)}60%{opacity:1;left:50%;transform:translate(-50%,-50%) rotate(720deg)}100%{opacity:0;left:50%;transform:translate(-50%,-90%) rotate(720deg) scale(1.5)}}
+@keyframes f2{0%,100%{opacity:0;transform:translate(-50%,-50%) scale(.2)}20%,60%{opacity:1;transform:translate(-50%,-50%) scale(1.3)}40%,80%{opacity:1;transform:translate(-50%,-50%) scale(.9)}}
+@keyframes f3{0%{opacity:1;left:110%;transform:translate(-50%,-50%) scaleX(-1)}50%{opacity:1;transform:translate(-50%,-70%) scaleX(-1)}100%{opacity:0;left:-10%;transform:translate(-50%,-50%) scaleX(-1)}}
+@keyframes f4{0%{opacity:1;left:-15%;top:75%;font-size:130px;transform:translate(-50%,-50%) rotate(-50deg)}35%{top:20%;transform:translate(-50%,-50%) rotate(-10deg)}60%{left:55%;top:75%;transform:translate(-50%,-50%) rotate(70deg);font-size:170px}100%{opacity:0;left:115%;top:90%;transform:translate(-50%,-50%) rotate(90deg)}}
+@media (prefers-reduced-motion:reduce){#body,.eye,.dots circle{animation:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="goals"></div>
+  <div id="bar"><div id="fill"></div></div>
+  <div id="info"><span id="gname"></span><span id="left"></span></div>
+  <div id="stage">
+    <div id="bubble"></div>
+    <div id="fx"></div>
+    <div id="np"></div>
+    <div id="host" aria-label="Китика"><div class="dots"><i></i><i></i><i></i></div><span class="spark" style="left:18%;top:22%">✨</span><span class="spark" style="right:14%;top:12%;animation-delay:.3s">✨</span><span class="spark" style="right:8%;top:48%;animation-delay:.6s">✨</span><img src="kitika.png" alt="Китика"></div>
+  </div>
+  <div id="ticker"><i>Чат:</i> пока тихо</div>
+  <div id="ym"></div>
+  <details open>
+    <summary>Тест без стрима</summary>
+    <div id="tests"></div>
+    <button id="fast">Быстрый режим: выкл</button>
+    <button id="c1">Комментарий</button>
+    <button id="mus">Музыка: выкл</button>
+  </details>
+</div>
+<script>
+const P=new URLSearchParams(location.search);
+if(P.get('clean'))document.body.classList.add('clean');
+let fast=!!P.get('fast');
+const G=[
+ {k:'rose',e:'🌹',n:'Роза',m:5,re:/rose|роз/i},
+ {k:'donut',e:'🍩',n:'Пончик',m:5,re:/donut|пончик/i},
+ {k:'heart',e:'🫶',n:'Сердце из рук',m:5,re:/hand heart|hands heart|сердце из рук|сердц\w* из рук/i},
+ {k:'swan',e:'🦢',n:'Лебедь',m:10,re:/swan|лебед/i},
+ {k:'whale',e:'🐋',n:'Ныряющий кит',m:10,boss:1,re:/whale|кит/i}
+];
+const $=id=>document.getElementById(id);
+const host=$('host'),bubble=$('bubble');
+let cur=0,deadline=0,done=false;
+const ms=g=>g.m*60000/(fast?30:1);
+
+// --- UI
+function drawGoals(){
+  $('goals').innerHTML=G.map((g,i)=>`<div class="goal${g.boss?' boss':''}${i<cur?' done':''}${i==cur&&!done?' active':''}"><b>${g.e}</b>${g.n}</div>`).join('');
+  $('gname').textContent=done?'Все цели выполнены':`Цель ${cur+1} из 5: ${G[cur].n}`;
+}
+let w1=false,w2=false;
+function startTimer(){deadline=Date.now()+ms(G[cur]);w1=w2=false;drawGoals()}
+function remind(last){
+  const g=G[cur];
+  const txt=last?`Осталось 30 секунд! Скорее, подарите «${g.n}» ${g.e}`:`Осталась минута! Нужен подарок «${g.n}» ${g.e}`;
+  enqueue(async()=>{mood('');await say(txt)},true);
+}
+setInterval(()=>{
+  if(done){$('fill').style.transform='scaleX(0)';$('left').textContent='';return}
+  const left=deadline-Date.now(),t=ms(G[cur]);
+  $('fill').style.transform=`scaleX(${Math.max(0,left/t)})`;
+  const s=Math.max(0,Math.ceil(left/1000));
+  $('left').textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  const k=fast?1/30:1,ga=document.querySelector('.goal.active');
+  if(ga)ga.classList.toggle('urgent',left<=60000*k);
+  if(left<=0){fail();return}
+  if(!w2&&left<=30000*k){w1=w2=true;remind(true)}
+  else if(!w1&&left<=60000*k){w1=true;remind(false)}
+},200);
+
+// --- host behaviour
+let moodT;
+function mood(m,t){
+  host.classList.remove('think','happy','sad');
+  if(m)host.classList.add(m);
+  clearTimeout(moodT);
+  if(t)moodT=setTimeout(()=>host.classList.remove('think','happy','sad'),t);
+}
+const sleep=t=>new Promise(r=>setTimeout(r,t));
+async function say(text){
+  bubble.textContent='';bubble.classList.add('on');
+  host.classList.add('talk');
+  for(const ch of text){bubble.textContent+=ch;await sleep(32)}
+  host.classList.remove('talk');
+  await sleep(2200);
+  bubble.classList.remove('on');
+}
+const queue=[];let busy=false;
+function enqueue(fn,front){front?queue.unshift(fn):queue.push(fn);if(!busy)run()}
+async function run(){busy=true;while(queue.length)await queue.shift()();busy=false}
+
+function fx(i){
+  const el=$('fx');el.className='';el.textContent=G[i].e;
+  void el.offsetWidth;el.removeAttribute('style');el.className='fx'+i;
+}
+
+// --- game logic
+function gift(name){
+  if(done)return;
+  const i=G.findIndex(g=>g.re.test(name));
+  if(i<0)return;
+  fx(i);
+  if(i!==cur){enqueue(async()=>{mood('happy',2500);await say('Спасибо за подарок! Но сейчас нужен: '+G[cur].e)});return}
+  cur++;
+  if(cur>=G.length){win();return}
+  startTimer();
+  enqueue(async()=>{mood('happy',2500);await say(`Ура, ${G[cur-1].n}! Дальше: ${G[cur].e} ${G[cur].n}`)});
+}
+function fail(){
+  cur=0;startTimer();
+  $('goals').classList.add('shake');setTimeout(()=>$('goals').classList.remove('shake'),600);
+  enqueue(async()=>{mood('sad',4000);await say('Время вышло… Всё сбросилось. Начинаем сначала: 🌹')});
+}
+function win(){
+  done=true;drawGoals();
+  enqueue(async()=>{mood('happy');await say('Цель выполнена! Спасибо всем!');await sleep(4000);mood('')});
+}
+
+// --- comments
+const LOOK={
+ hair:'У меня длинные волнистые волосы: мятные сверху, а к кончикам становятся сиреневыми. И ещё милый вихор на макушке!',
+ eyes:'У меня глаза разного цвета: один бирюзовый, другой фиалковый!',
+ bird:'Это мой механический друг, маленькая птичка. Она сидит у меня на руке!',
+ clip:'На волосах у меня заколка: золотой месяц со звёздочкой!',
+ clothes:'На мне зелёный жилет с золотым компасом, белая кружевная блузка с бордовой лентой и брошью, клетчатая бордовая юбка с белыми оборками, белые вязаные гольфы и коричневые ботинки!',
+ all:'Я Китика! Волосы длинные, мятно-сиреневые, глаза разные: бирюзовый и фиалковый. На мне зелёный жилет с компасом и бордовая клетчатая юбка, а на руке сидит механическая птичка!'
+};
+const PERSONA='Тебя зовут Китика, ты ИИ-ведущая TikTok LIVE. Отвечай по-русски, коротко и дружелюбно. Твоя внешность: длинные волнистые волосы, мятные сверху и сиреневые к кончикам, вихор на макушке, заколка в виде золотого месяца со звёздочкой; глаза разного цвета (бирюзовый и фиалковый); зелёный жилет с золотым компасом, белая кружевная блузка с бордовой лентой и бирюзовой брошью, бордовая клетчатая юбка с белыми оборками, белые вязаные гольфы, коричневые ботинки; на руке сидит маленькая механическая птичка; ты показываешь знак мира.';
+function reply(t){
+  t=t.toLowerCase();
+  if(/птичк|птиц/.test(t))return LOOK.bird;
+  if(/заколк|месяц/.test(t))return LOOK.clip;
+  if(/волос|причёск|причёс|причес/.test(t))return LOOK.hair;
+  if(/глаз/.test(t))return LOOK.eyes;
+  if(/одет|одежд|плать|юбк|жилет|гольф|ботин|что на тебе/.test(t))return LOOK.clothes;
+  if(/выгляд|внешн|как ты выгл/.test(t))return LOOK.all;
+  if(/привет|hi|hello/.test(t))return 'Привет! Я Китика, рада тебя видеть!';
+  if(/как дела/.test(t))return 'Отлично! А у тебя как?';
+  if(/кто ты|ты кто/.test(t))return 'Я Китика, ИИ-ведущая этого эфира. Помогите мне с целями!';
+  if(/цел|подар/.test(t))return `Сейчас нужен подарок: ${G[cur].e} ${G[cur].n}`;
+  return 'Спасибо за комментарий! Ты классный!';
+}
+function comment(user,text,ready){
+  $('ticker').innerHTML=`<i>${esc(user)}:</i> ${esc(text)}`;
+  enqueue(async()=>{mood('think');await sleep(1400);mood('');await say(ready||reply(text))});
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// --- test buttons
+$('tests').innerHTML=G.map((g,i)=>`<button data-i="${i}">${g.e} ${g.n}</button>`).join('');
+$('tests').onclick=e=>{const b=e.target.closest('button');if(b)gift(G[b.dataset.i].k)};
+$('fast').onclick=e=>{fast=!fast;e.target.textContent='Быстрый режим: '+(fast?'вкл (5 мин = 10 с)':'выкл');startTimer()};
+$('c1').onclick=()=>comment('зритель','Привет! Как дела?');
+
+// --- live connection (relay server), e.g. ?ws=ws://localhost:8080
+// messages: {type:"gift",gift:"Rose"} | {type:"comment",user,text,reply?}
+if(P.get('ws')){
+  const connect=()=>{
+    let ws;
+    try{ws=new WebSocket(P.get('ws'))}catch(e){return}
+    ws.onopen=()=>ws.send(JSON.stringify({type:'hello',persona:PERSONA}));
+    ws.onmessage=m=>{try{const d=JSON.parse(m.data);
+      if(d.type==='gift')gift(d.gift);
+      if(d.type==='comment')comment(d.user||'зритель',d.text||'',d.reply)}catch(e){}};
+    ws.onclose=()=>setTimeout(connect,3000);
+  };
+  connect();
+}
+// --- фоновая музыка: свои файлы (music/list.json) или виджет Яндекс Музыки (?ym=...)
+let TRACKS=[],order=[],want=false;
+const VOL=.25,DUCK=.08,bgm=new Audio();bgm.volume=VOL;
+fetch('music/list.json').then(r=>r.json()).then(a=>{if(Array.isArray(a))TRACKS=a}).catch(()=>{});
+// поиск спокойной музыки с открытыми лицензиями (Openverse), с запасным списком из music/list.json
+const QS=['calm ambient','relaxing piano','lofi chill','soft instrumental','peaceful acoustic guitar','meditation ambient','gentle piano'];
+const pool=[],seen=new Set();let rp=null,errs=0;
+function refill(){return rp||(rp=doRefill().finally(()=>{rp=null}))}
+async function doRefill(){
+  try{
+    const q=QS[Math.random()*QS.length|0],pg=1+(Math.random()*3|0);
+    const r=await fetch('https://api.openverse.org/v1/audio/?q='+encodeURIComponent(q)+'&license_type=commercial&category=music&page_size=20&page='+pg);
+    const d=await r.json();
+    (d.results||[]).forEach(a=>{
+      const l=String(a.license||'').toLowerCase();
+      if(!a.url||!a.url.startsWith('https://')||seen.has(a.url)||/nd|nc/.test(l)||(a.duration&&a.duration<60000))return;
+      seen.add(a.url);
+      pool.push({url:a.url,title:a.title||'Без названия',by:a.creator||'',
+        lic:/^(cc0|pdm)$/.test(l)?l.toUpperCase():'CC '+l.toUpperCase()+(a.license_version?' '+a.license_version:'')});
+    });
+  }catch(e){}
+}
+function np(t){
+  const el=$('np');
+  if(!t){el.style.display='none';return}
+  el.style.display='block';
+  el.innerHTML='♪ '+esc(t.title)+(t.by?' — '+esc(t.by):'')+(t.lic?' ('+esc(t.lic)+')':'');
+}
+async function nextTrack(){
+  if(!want)return;
+  if(!pool.length)await refill();
+  let t=pool.length?pool.splice(Math.random()*pool.length|0,1)[0]:null;
+  if(!t&&TRACKS.length)t={url:'music/'+TRACKS[Math.random()*TRACKS.length|0],title:'Музыка',by:'',lic:''};
+  if(!t){np({title:'не удалось найти музыку',by:'',lic:''});return}
+  bgm.src=t.url;np(t);bgm.play().catch(()=>{});
+  if(pool.length<3)refill();
+}
+bgm.onended=nextTrack;
+bgm.onplaying=()=>{errs=0};
+bgm.onerror=()=>{if(want&&++errs<8)setTimeout(nextTrack,400)};
+function music(v){
+  want=v;
+  if(v){bgm.src?bgm.play().catch(()=>{}):nextTrack()}else bgm.pause();
+  $('mus').textContent='Музыка: '+(v?'вкл':'выкл');
+}
+$('mus').onclick=()=>music(!want);
+// тише, пока Китика говорит
+setInterval(()=>{const g=host.classList.contains('talk')?DUCK:VOL;bgm.volume=Math.min(1,Math.max(0,bgm.volume+(g-bgm.volume)*.2))},100);
+// автозапуск: ?music=1 (если браузер не даёт — запустится по первому клику)
+if(P.get('music')){music(true);document.addEventListener('pointerdown',()=>{if(want&&bgm.paused)music(true)},{once:true})}
+// виджет Яндекс Музыки: ?ym=<src из «Поделиться → HTML-код»>
+const YM=P.get('ym');
+if(YM&&YM.startsWith('https://music.yandex.ru/iframe/'))$('ym').innerHTML='<iframe allow="autoplay" src="'+esc(YM)+'"></iframe>';
+if(fast)$('fast').textContent='Быстрый режим: вкл (5 мин = 10 с)';
+startTimer();
+</script>
+</body>
+</html>
