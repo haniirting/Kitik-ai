@@ -1,0 +1,11 @@
+{
+  "name": "kitika-relay",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "node server.js" },
+  "dependencies": {
+    "tiktok-live-connector": "^2.0.3",
+    "ws": "^8.18.0"
+  }
+}
